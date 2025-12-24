@@ -1,0 +1,4 @@
+project_id   = "luminous-style-482114-e5"
+region       = "us-central1"         # ej: "us-central1"
+cluster_name = "kambista-gke"
+namespace    = "kambista-dev"

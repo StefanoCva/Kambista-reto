@@ -32,8 +32,9 @@ jobs:
       run: gcloud auth configure-docker --quiet
 
     - name: Build Docker image
+      working-directory: ./app
       run: |
-        docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest ./app
+        docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest .
 
     - name: Push Docker image
       run: |

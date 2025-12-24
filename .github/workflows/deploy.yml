@@ -6,7 +6,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: ${{ secrets.GCP_REGION }}
+  REGION: $ us-central1 
   CLUSTER: ${{ secrets.GKE_CLUSTER }}
   REPOSITORY: kambista-repo
   IMAGE: hello

@@ -30,7 +30,9 @@ jobs:
 
     - name: Build and push image with Cloud Build
       run: |
-        gcloud builds submit ./app --tag=us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest --project=$PROJECT_ID
+        IMAGE_URI="us-central1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:latest"
+        echo "Building image: $IMAGE_URI"
+        gcloud builds submit ./app --tag="$IMAGE_URI" --project="$PROJECT_ID"
 
     - name: Get GKE credentials
       run: |

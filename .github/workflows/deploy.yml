@@ -33,11 +33,11 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest ./app
+        docker build -t us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest ./app
 
     - name: Push Docker image
       run: |
-        docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest
+        docker push us-central1-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:latest
 
     - name: Get GKE credentials
       run: |

@@ -33,13 +33,10 @@ jobs:
           IMAGE_URI="us-central1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:latest"
           echo "Building image: $IMAGE_URI"
 
-          GCS_BUCKET="${PROJECT_ID}-cloudbuild"
-
           gcloud builds submit ./app \
             --tag="$IMAGE_URI" \
-            --project="$PROJECT_ID" \
-            --gcs-source-staging-dir="gs://${GCS_BUCKET}/source" \
-            --gcs-log-dir="gs://${GCS_BUCKET}/logs"
+            --project="$PROJECT_ID"
+
 
       - name: Get GKE credentials
         run: |

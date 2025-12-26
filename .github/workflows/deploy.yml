@@ -36,9 +36,7 @@ jobs:
           gcloud builds submit ./app \
             --tag="$IMAGE_URI" \
             --project="$PROJECT_ID"
-
-
-
+            
       - name: Get GKE credentials
         run: |
           gcloud container clusters get-credentials "$CLUSTER" \

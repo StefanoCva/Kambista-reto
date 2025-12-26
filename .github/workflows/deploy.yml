@@ -6,7 +6,7 @@ on:
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: us-central1
+  REGION: ${{ secrets.GCP_REGION }}
   CLUSTER: ${{ secrets.GKE_CLUSTER }}
   REPOSITORY: kambista-repo
   IMAGE: hello
@@ -17,30 +17,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Authenticate to Google Cloud
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Set up gcloud SDK
-      uses: google-github-actions/setup-gcloud@v2
+      - name: Set up gcloud SDK
+        uses: google-github-actions/setup-gcloud@v2
 
-    - name: Build and push image with Cloud Build
-      run: |
-        IMAGE_URI="us-central1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:latest"
-        echo "Building image: $IMAGE_URI"
-        gcloud builds submit ./app --tag="$IMAGE_URI" --project="$PROJECT_ID"
+      - name: Build and push image with Cloud Build
+        run: |
+          IMAGE_URI="us-central1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:latest"
+          echo "Building image: $IMAGE_URI"
 
-    - name: Get GKE credentials
-      run: |
-        gcloud container clusters get-credentials $CLUSTER \
-          --region $REGION \
-          --project $PROJECT_ID
+          GCS_BUCKET="${PROJECT_ID}-cloudbuild"
 
-    - name: Deploy manifests to GKE
-      run: |
-        kubectl apply -f k8s/ -n $NAMESPACE
+          gcloud builds submit ./app \
+            --tag="$IMAGE_URI" \
+            --project="$PROJECT_ID" \
+            --gcs-source-staging-dir="gs://${GCS_BUCKET}/source" \
+            --gcs-log-dir="gs://${GCS_BUCKET}/logs"
+
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials "$CLUSTER" \
+            --region "$REGION" \
+            --project "$PROJECT_ID"
+
+      - name: Deploy manifests to GKE
+        run: |
+          kubectl apply -f k8s/ -n "$NAMESPACE"
+
+
+
+
 

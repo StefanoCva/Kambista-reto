@@ -29,14 +29,15 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker auth for Artifact Registry
-        run: |
-          gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+        run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
 
       - name: Build Docker image
-        run: docker build -t "${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:${GITHUB_SHA}" ./app
+        run: |
+          docker build -t "${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:${GITHUB_SHA}" ./app
 
       - name: Push Docker image
-        run: docker push "${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:${GITHUB_SHA}""
+        run: |
+          docker push "${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:${GITHUB_SHA}"
 
       - name: Get GKE credentials
         run: |
@@ -47,4 +48,5 @@ jobs:
       - name: Deploy to GKE (set image)
         run: |
           kubectl -n "${NAMESPACE}" set image deployment/hello-app \
-            hello="${IMAGE_URI}" --record
+            hello="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:${GITHUB_SHA}" \
+            --record

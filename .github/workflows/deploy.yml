@@ -50,3 +50,4 @@ jobs:
           kubectl -n "${NAMESPACE}" set image deployment/hello-app \
             hello="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:${GITHUB_SHA}" \
             --record
+# trigger pipeline

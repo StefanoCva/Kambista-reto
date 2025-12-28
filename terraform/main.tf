@@ -19,11 +19,73 @@ provider "kubernetes" {
 
 resource "kubernetes_namespace_v1" "ns" {
   metadata {
-    name = var.namespace
+    name = "kambista-dev"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+resource "kubernetes_deployment_v1" "hello_app" {
+  metadata {
+    name      = "hello-app"
+    namespace = var.namespace
     labels = {
-      "owner" = "sebastian"
-      "env"   = "dev"
+      app = "hello"
+    }
+  }
+
+  spec {
+    replicas = 1
+
+    selector {
+      match_labels = {
+        app = "hello"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "hello"
+        }
+      }
+
+      spec {
+        container {
+          name  = "hello"
+          image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository}/${var.image}:latest"
+
+          port {
+            container_port = 3000
+          }
+        }
+      }
     }
   }
 }
+resource "kubernetes_service_v1" "hello_service" {
+  metadata {
+    name      = "hello-service"
+    namespace = var.namespace
+    labels = {
+      app = "hello"
+    }
+  }
+
+  spec {
+    selector = {
+      app = "hello"
+    }
+
+    port {
+      port        = 80
+      target_port = 3000
+    }
+
+    type = "LoadBalancer"
+  }
+}
+
+
 

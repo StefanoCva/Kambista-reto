@@ -2,11 +2,11 @@ name: CI/CD to GKE
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  REGION: us-central1
+  REGION: ${{ secrets.GCP_REGION }}
   CLUSTER: ${{ secrets.GKE_CLUSTER }}
   REPOSITORY: kambista-repo
   IMAGE: hello
@@ -28,14 +28,19 @@ jobs:
       - name: Set up gcloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      # 👇 IMPORTANTE: aquí ya NO hay buckets ni GCS_BUCKET
-      - name: Build and push image with Cloud Build
+      - name: Configure Docker auth for Artifact Registry
         run: |
-          IMAGE_URI="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:latest"
-          echo "Building image: ${IMAGE_URI}"
-          gcloud builds submit ./app \
-            --tag="${IMAGE_URI}" \
-            --project="${PROJECT_ID}"
+          gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
+
+      - name: Build Docker image
+        run: |
+          IMAGE_URI="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:${GITHUB_SHA}"
+          echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
+          docker build -t "${IMAGE_URI}" ./app
+
+      - name: Push Docker image
+        run: |
+          docker push "${IMAGE_URI}"
 
       - name: Get GKE credentials
         run: |
@@ -43,6 +48,7 @@ jobs:
             --region "${REGION}" \
             --project "${PROJECT_ID}"
 
-      - name: Deploy manifests to GKE
+      - name: Deploy to GKE (set image)
         run: |
-          kubectl apply -f k8s/ -n "${NAMESPACE}"
+          kubectl -n "${NAMESPACE}" set image deployment/hello-app \
+            hello="${IMAGE_URI}" --record

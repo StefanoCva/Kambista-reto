@@ -34,13 +34,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE_URI="${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:${GITHUB_SHA}"
-          echo "IMAGE_URI=${IMAGE_URI}" >> $GITHUB_ENV
-          docker build -t "${IMAGE_URI}" ./app
+          docker build\
+          -t "$REGION-docker.pkg.dev/$PROJECT_ID/REPOSITORY/$IMAGE:$GITHUB_SHA" \
+          ./app
 
       - name: Push Docker image
         run: |
-          docker push "${IMAGE_URI}"
+          docker push "$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:GITHUB_SHA"
 
       - name: Get GKE credentials
         run: |

@@ -30,6 +30,7 @@ resource "kubernetes_deployment_v1" "hello_app" {
   metadata {
     name      = "hello-app"
     namespace = var.namespace
+
     labels = {
       app = "hello"
     }
@@ -54,8 +55,9 @@ resource "kubernetes_deployment_v1" "hello_app" {
       spec {
         container {
           name  = "hello"
-          image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository}/${var.image}:latest"
+          image = "${var.region}-docker.pkg.dev/${var.project_id}/${var.repository}/${var.image}:1.0"
 
+          # 👇 AQUÍ va el port, dentro del container
           port {
             container_port = 3000
           }
@@ -64,13 +66,12 @@ resource "kubernetes_deployment_v1" "hello_app" {
     }
   }
 }
+
+
 resource "kubernetes_service_v1" "hello_service" {
   metadata {
     name      = "hello-service"
     namespace = var.namespace
-    labels = {
-      app = "hello"
-    }
   }
 
   spec {
@@ -86,6 +87,15 @@ resource "kubernetes_service_v1" "hello_service" {
     type = "LoadBalancer"
   }
 }
+
+terraform {
+  backend "gcs" {
+    bucket = "luminous-style-482114-e5-tfstate"
+    prefix = "kambista-reto/state"
+  }
+}
+
+
 
 
 
